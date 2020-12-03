@@ -62,6 +62,7 @@ function table.valsToFloat(input)
     return input
 end
 
+--- Draws the marker. Creates its own thread, only needs run once.
 function Marker:Draw()
     if self._Drawing == true then
         return
@@ -100,10 +101,13 @@ function Marker:Draw()
     end)
 end
 
+--- Stops the marker from being drawn
 function Marker:Destroy()
     self._Drawing = false
 end
 
+--- Gets or sets the color of the marker
+--- @param color table | nil the current color value. If `nil`, returns the current color value
 function Marker:Color(color)
     if color == nil then
         return self._Color

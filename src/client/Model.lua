@@ -7,6 +7,7 @@ Model.__call = function()
     return "Vector3"
 end
 
+--- @param model number | string the model hash or name
 function Model.new(model)
     if type(model) == "string" then
         if tonumber(model) ~= nil then

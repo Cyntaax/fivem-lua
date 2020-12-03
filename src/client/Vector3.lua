@@ -7,6 +7,10 @@ Vector3.__call = function()
     return "Vector3"
 end
 
+--- Creates an instance of the `Vector3` class
+--- @param x number
+--- @param y number
+--- @param z number
 function Vector3.new(x, y, z)
     local _Vector3 = {
         X = x + 0.0,
