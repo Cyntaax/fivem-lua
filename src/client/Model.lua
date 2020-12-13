@@ -4,7 +4,7 @@ Model = setmetatable({}, Model)
 Model.__index = Model
 
 Model.__call = function()
-    return "Vector3"
+    return "Model"
 end
 
 --- @param model number | string the model hash or name
@@ -18,12 +18,12 @@ function Model.new(model)
         Raw = model,
         Hash = model
     }
-    
+
     return setmetatable(_Model, Model)
 end
 
 function Model:Load()
-    if not IsModelInCdImage(self.Hash) then
+    if not IsModelValid(self.Hash) then
         print("^1Error: Invalid model " .. self.Hash)
     end
 
@@ -36,7 +36,7 @@ function Model:Load()
         end
         Wait(100)
     end
-    
+
     return true
 end
 

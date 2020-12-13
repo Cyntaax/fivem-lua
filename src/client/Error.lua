@@ -23,7 +23,3 @@ end
 function Error:Print()
     print("^1" .. self.Message)
 end
-
-Events:On('errors_get' .. GetCurrentResourceName(), function(cb)
-    cb(ErrorCache)
-end)

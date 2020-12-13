@@ -1,5 +1,18 @@
 World = {}
 
+function dump(o)
+    if type(o) == 'table' then
+        local s = '{ '
+        for k,v in pairs(o) do
+            if type(k) ~= 'number' then k = '"'..k..'"' end
+            s = s .. '['..k..'] = ' .. dump(v) .. ','
+        end
+        return s .. '} '
+    else
+        return tostring(o)
+    end
+end
+
 --- creates a vehicle in the world at a given position
 --- @param model number | string the model of the vehicle to spawn
 --- @param position Vector3 the position to spawn the vehicle at
@@ -8,13 +21,16 @@ World = {}
 --- @return Vehicle
 function World:CreateVehicle(model, position, heading, networked)
     local vehModel = Model.new(model)
+    print("position", dump(position))
     if not vehModel:Load() then return end
     local veh = CreateVehicle(vehModel.Hash, position.X, position.Y, position.Z, heading or 0, networked or true, true)
     vehModel:Unload()
     if veh == 0 then
         print("^1Error: An Unknown error happened while creating the vehicle")
+        return
     end
-    
+    print("^2Created Vehicle: ^3" .. veh .. "^0" .. " at ^4" .. position.X .. ", " .. position.Y .. ", " .. position.Z)
+
     return Vehicle.new(veh)
 end
 

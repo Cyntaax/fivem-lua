@@ -10,10 +10,64 @@ end
 function Vehicle.new(handle)
     local _Vehicle = {
         Handle = handle,
-        PassengerCapacity = GetVehicleMaxNumberOfPassengers(handle)
+        PassengerCapacity = GetVehicleMaxNumberOfPassengers(handle),
     }
-    
+
     return setmetatable(_Vehicle, Vehicle)
+end
+
+function Vehicle:Model(model)
+    if model == nil then
+        return GetEntityModel(self.Handle)
+    end
+    local pos = self:Position()
+    local heading = self:Heading()
+    self:Delete(true)
+    local newveh = World:CreateVehicle(model,pos, heading,true)
+
+    self.Handle = newveh.Handle
+end
+
+---@param wait boolean Whether to actually wait for the vehicle to delete
+function Vehicle:Delete(wait)
+    if wait == true then
+        DeleteVehicle(self.Handle)
+        while DoesEntityExist(self.Handle) do
+            Citizen.Wait(5)
+        end
+        return
+    end
+
+    DeleteVehicle(self.Handle)
+end
+
+
+--- @return Vector3
+function Vehicle:Position(pos)
+    if type(pos) == "table" then
+        if pos.X and pos.Y and pos.Z then
+            SetEntityCoords(self.Handle, pos.X, pos.Y, pos.Z)
+            return
+        end
+        Error.new("Invalid position"):Print()
+    end
+
+    local _pos = GetEntityCoords(self.Handle)
+    return Vector3.new(_pos.x, _pos.y, _pos.z)
+end
+
+function Vehicle:Heading(heading)
+    if type(heading) == "number" then
+        SetEntityHeading(self.Handle, heading + 0.0)
+        return self:Heading()
+    end
+
+    return GetEntityHeading(self.Handle)
+end
+
+function Vehicle:GetNetworkOwner()
+    local owner = NetworkGetEntityOwner(self.Handle)
+    return NetworkGetEntityOwner(owner), GetPlayerServerId(owner)
 end
 
 --- opens a vehicle door

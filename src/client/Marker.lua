@@ -7,7 +7,7 @@ Marker.__call = function()
 end
 
 --- @param markerType MarkerType
---- @param color table e.g. { 255, 255, 255, 255 } 
+--- @param color table e.g. { 255, 255, 255, 255 }
 --- @param position table
 --- @param direction table
 --- @param rotation table
@@ -15,6 +15,7 @@ end
 --- @param bobble boolean
 --- @param faceCamera boolean
 --- @param param19 boolean
+--- @param rotate boolean
 --- @param textureDict string
 --- @param textureName string
 --- @param drawOnEntity boolean
@@ -28,27 +29,28 @@ function Marker.new(
         bobble,
         faceCamera,
         param19,
+        rotate,
         textureDict,
         textureName,
         drawOnEntity
 )
     _Marker = {
-        _Color = color or { 255.0, 255.0, 255.0, 255.0 },
+        _Color = color or { 255, 255, 255, 255 },
         _MarkerType = markerType or MarkerType.CircleSkinny,
-        _Position = position or {},
-        _Direction = direction or {},
+        _Position = position or {0,0,0},
+        _Direction = direction or {0,0,0},
         _Rotation = rotation or 0,
         _Bobble = bobble or false,
         _FaceCamera = faceCamera or false,
         _Param19 = param19 or 0,
-        _Rotate = rotate or 0,
-        _TextureDict = textureDict or "",
-        _TextureName = textureName or "",
+        _Rotate = rotate or false,
+        _TextureDict = textureDict or 0,
+        _TextureName = textureName or 0,
         _DrawOnEntity = drawOnEntity or false,
         _Scale = scale or { 1.0, 1.0, 1.0 },
         _Drawing = false
     }
-    
+
     return setmetatable(_Marker, Marker)
 end
 
@@ -58,7 +60,7 @@ function table.valsToFloat(input)
             input[i] = input[i] + 0.0
         end
     end
-    
+
     return input
 end
 
@@ -67,16 +69,42 @@ function Marker:Draw()
     if self._Drawing == true then
         return
     end
-    
+
+    print(self._MarkerType,
+            self._Position.X,
+            self._Position.Y,
+            self._Position.Z,
+            self._Direction[1],
+            self._Direction[2],
+            self._Direction[3],
+            self._Rotation[1],
+            self._Rotation[2],
+            self._Rotation[3],
+            self._Scale[1],
+            self._Scale[2],
+            self._Scale[3],
+            self._Color[1],
+            self._Color[2],
+            self._Color[3],
+            self._Color[4],
+            self._Bobble,
+            self._FaceCamera,
+            self._Param19,
+            self._Rotate,
+            self._TextureDict,
+            self._TextureName,
+            self._DrawOnEntity)
+    --                                         (----- dir ---)|(    rotation )|
+-- DrawMarker(2, loc["x"], loc["y"], loc["z"], 0.0, 0.0, 0.0, ( 0.0, 0.0, 0.0, ) (0.25, 0.2, 0.1,) (255, 255, 255, 155), 0, 0, 0, 1, 0, 0, 0)
     self._Drawing = true
     Citizen.CreateThread(function()
         while self._Drawing == true do
-            Citize.Wait(0)
+            Citizen.Wait(0)
             DrawMarker(
                     self._MarkerType,
-                    self._Position[1],
-                    self._Position[2],
-                    self._Position[3],
+                    self._Position.X,
+                    self._Position.Y,
+                    self._Position.Z,
                     self._Direction[1],
                     self._Direction[2],
                     self._Direction[3],
@@ -118,11 +146,11 @@ function Marker:Color(color)
             print("^1Error setting color:^0 Requires 4 fields, but got " .. #color)
             return
         end
-        
+
         color = table.valsToFloat(color)
-        
+
         self._Color = color
-        
+
         return self._Color
     else
         print("^1Error: Invalid type.^0 Expected (table) got (" .. type(color) .. ")")
@@ -191,10 +219,6 @@ function Marker:Scale(scale)
         print("^1Error: Invalid type.^0 Expected (table) got (" .. type(scale) .. ")")
     end
 end
-
-local testMarker = Marker.new(MarkerType.CarSymbol)
-
-testMarker:Draw()
 
 function Marker:Rotation(rotation)
     if rotation == nil then
@@ -274,23 +298,10 @@ function Marker:MarkerType(markerType)
             print("^1Error: Marker type not found")
             return
         end
-        
+
         self._MarkerType = markerType
     end
 end
-
-
-
-local marker = Marker.new(
-        MarkerType.CircleSkinny,
-        { 255, 255, 255, 255 },
-        { 0, 0, 0 },
-        { 0, 0, 0 },
-        { 1.0, 1.0, 1.0 },
-        { 0.0, 0.0, 0.0 },
-        false,
-        false
-)
 
 --- @class MarkerType
 MarkerType = {

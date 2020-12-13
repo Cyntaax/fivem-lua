@@ -61,7 +61,7 @@ end
 --- @return Vector3
 function Ped:Position(position)
     if type(position) ~= "table" then
-        local rawpos = GetEntityCoords(self._Handle)
+        local rawpos = GetEntityCoords(self.Handle)
         local posVec = Vector3.new(rawpos.x, rawpos.y, rawpos.z)
         return posVec
     end
@@ -93,3 +93,5 @@ PedComponent = {
     Badge = 10,
     Torso2 = 11
 }
+
+Player = Ped.new(PlayerPedId())
