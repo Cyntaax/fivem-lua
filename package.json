@@ -36,7 +36,7 @@
       [
         "@semantic-release/exec",
         {
-          "generateNotesCmd": "npm run build ${nextRelease.version} && git config user.name 'github actions' && git config user.email 'Github Actions' && git add . && git commit --allow-empty -m 'chore: bump version' && git push origin master && cd ./dist && zip -qq -r release.zip ./"
+          "generateNotesCmd": "npm run --silent build ${nextRelease.version} && git config user.name 'github actions' && git config user.email 'Github Actions' && git add . && git commit --allow-empty -m 'chore: bump version' && git push origin master && cd ./dist && zip -qq -r release.zip ./"
         }
       ]
     ],
