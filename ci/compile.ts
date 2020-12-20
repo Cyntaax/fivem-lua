@@ -26,9 +26,11 @@ class LuaBuilder {
                 await this.writeContext(context, contextBuff)
             }
             fs.readFile(`./src/fxmanifest.lua`, 'utf8', (err, manifest) => {
-                 const newManifest = manifest.replace(/^(version )'(.*)'$/gm, `$1 '${process.env.NEXT_VERSION || '0.0.0'}'`)
+                const newManifest = manifest.replace(/^(version )'(.*)'$/gm, `$1 '${process.env.NEXT_VERSION || '0.0.0'}'`)
                 fs.writeFile(`./dist/fxmanifest.lua`, newManifest, () => {
-                    resolve()
+                    fs.writeFile(`./src/fxmanifest.lua`, newManifest, () => {
+                        resolve()
+                    })
                 })
             })
         })
