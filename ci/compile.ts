@@ -1,4 +1,3 @@
-
 import {Glob}  from 'glob'
 import * as fs from 'fs'
 
