@@ -1,3 +1,198 @@
+--- @class ColorString
+ColorString = setmetatable({}, ColorString)
+
+ColorString.__index = ColorString
+
+ColorString.__call = function()
+    return "ColorString"
+end
+
+function ColorString.new()
+    local _ColorString = {
+        Text = ""
+    }
+
+    return setmetatable(_ColorString, ColorString)
+end
+
+function ColorString:RedOrange(text)
+    self.Text = self.Text .. TextColors.RedOrange .. text
+    return self
+end
+
+function ColorString:LightGreen(text)
+    self.Text = self.Text .. TextColors.LightGreen .. text
+    return self
+end
+
+function ColorString:LightYellow(text)
+    self.Text = self.Text .. TextColors.LightYellow .. text
+    return self
+end
+
+function ColorString:DarkBlue(text)
+    self.Text = self.Text .. TextColors.DarkBlue .. text
+    return self
+end
+
+function ColorString:LightBlue(text)
+    self.Text = self.Text .. TextColors.LightBlue .. text
+    return self
+end
+
+function ColorString:Violet(text)
+    self.Text = self.Text .. TextColors.Violet .. text
+    return self
+end
+
+function ColorString:White(text)
+    self.Text = self.Text .. TextColors.White .. text
+    return self
+end
+
+function ColorString:BloodRed(text)
+    self.Text = self.Text .. TextColors.BloodRed .. text
+    return self
+end
+
+function ColorString:Fuchsia(text)
+    self.Text = self.Text .. TextColors.Fuchsia .. text
+    return self
+end
+
+function ColorString:End()
+    self.Text = self.Text .. "^0"
+    return self.Text
+end
+
+TextFormat = {
+    Bold = "^*",
+    Underline = "^_",
+    StrikeThrough = "^~",
+    UnderlineStrikeThrough = "^=",
+    BoldUnderlineStrikeThrough = "^*^=",
+    Cancel = "^r"
+}
+
+TextColors = {
+    RedOrange = "^1",
+    LightGreen = "^2",
+    LightYellow = "^3",
+    DarkBlue = "^4",
+    LightBlue = "^5",
+    Violet = "^6",
+    White = "^7",
+    BloodRed = "^8",
+    Fuchsia = "^9"
+}
+
+
+
+
+Command = setmetatable({}, Command)
+
+Command.__index = Command
+
+Command.__call = function()
+    return "Command"
+end
+
+--- @class CommandOptions
+CommandOptions = {
+    --- @type string
+    Default = ""
+}
+
+function Command.new(trigger)
+    local _Command = {
+        Trigger = trigger,
+        ArgsList = {},
+        Restrictors = {},
+        Handler = nil
+    }
+
+    return setmetatable(_Command, Command)
+end
+
+--- @param name string
+---@param options CommandOptions
+function Command:String(name, options)
+    table.insert(self.ArgsList, {
+        type = "string",
+        name = name
+    })
+    return self
+end
+
+function Command:Number(name)
+    table.insert(self.ArgsList, {
+        type = "number",
+        name = name
+    })
+    return self
+end
+
+function Command:Boolean(name)
+    table.insert(self.ArgsList, {
+        type = "boolean",
+        name = name
+    })
+    return self
+end
+
+--- @param handler fun(source: number): boolean
+function Command:Restrict(handler)
+    table.insert(self.Restrictors, handler)
+    return self
+end
+
+--- @param handler fun(source: number)
+function Command:SetHandler(handler)
+    self.Handler = handler
+    return self
+end
+
+function Command:Register()
+    RegisterCommand(self.Trigger, function(source, args)
+        local numRestrict = #self.Restrictors
+        local passed = 0
+        for k,v in pairs(self.Restrictors) do
+            local val = v()
+            if val == true then
+                passed = passed + 1
+            end
+        end
+
+        if passed ~= numRestrict then
+            Error.new("Restrictors failed for command", self.Trigger):Print()
+            return
+        end
+
+        for k,v in pairs(self.ArgsList) do
+            if v.type == "boolean" then
+                if args[k] == "true" or args[k] == "false" or args[k] == "1" or args[k] == "0" then
+                    if args[k] == "true" then args[k] = true end
+                    if args[k] == "1" then args[k] = true end
+                    if args[k] == "false" then args[k] = false end
+                    if args[k] == "0" then args[k] = false end
+                end
+            elseif v.type == "number" then
+                local out = tonumber(args[k])
+                if out == nil then
+                    Error.new("Could not assert to number"):Print()
+                    return
+                end
+                args[k] = out
+            end
+        end
+        print(json.encode(args))
+        self.Handler(source, table.unpack(args))
+    end)
+end
+
+
+
+
 ErrorCache = {}
 
 --- @class Error
@@ -23,10 +218,6 @@ end
 function Error:Print()
     print("^1" .. self.Message)
 end
-
-Events:On('errors_get' .. GetCurrentResourceName(), function(cb)
-    cb(ErrorCache)
-end)
 
 
 Events = {}
@@ -60,6 +251,86 @@ end
 
 
 
+
+
+HUD = {}
+
+--- Sets blurriness or something `Citizen.InvokeNative(0xBA3D65906822BED5, 1, 1, 0.0, 0.0, 0.0, 100.0)`
+function HUD:Fov(p1, p2, nearPlaneOut, nearPlaneIn, farPlaneOut, farPlaneIn)
+    Citizen.InvokeNative(0xBA3D65906822BED5, p1, p2, nearPlaneOut + 0.0, nearPlaneIn + 0.0, farPlaneOut + 0.0, farPlaneIn + 0.0)
+end
+
+
+Control = {
+    ESC = 322,
+    F1 = 288,
+    F2 = 289,
+    F3 = 170,
+    F5 = 166,
+    F6 = 167,
+    F7 = 168,
+    F8 = 169,
+    F9 = 56,
+    F10 = 57,
+    TILDE = 243,
+    NUM1 = 157,
+    NUM2 = 158,
+    NUM3 = 160,
+    NUM4 = 164,
+    NUM5 = 165,
+    NUM6 = 159,
+    NUM7 = 161,
+    NUM8 = 162,
+    NUM9 = 163,
+    MINUS = 84,
+    EQUALS = 83,
+    BACKSPACE = 177,
+    TAB = 37,
+    Q = 44,
+    W = 32,
+    E = 38,
+    R = 45,
+    T = 245,
+    Y = 246,
+    U = 303,
+    P = 199,
+    LEFTBRACKET = 39,
+    RIGHTBRACKET = 40,
+    ENTER = 18,
+    CAPS = 137,
+    A = 34,
+    S = 8,
+    D = 9,
+    F = 23,
+    G = 47,
+    H = 74,
+    K = 311,
+    L = 182,
+    LEFTSHIFT = 21,
+    Z = 20,
+    X = 73,
+    C = 26,
+    V = 0,
+    B = 29,
+    N = 249,
+    M = 244,
+    COMMA = 82,
+    PERIOD = 81,
+    LEFTCTRL = 36,
+    LEFTALT = 19,
+    SPACE = 22,
+    RIGHTCTRL = 70,
+    HOME = 213,
+    PAGEUP = 10,
+    PAGEDOWN = 11,
+    DELETE = 178,
+    LEFT = 174,
+    RIGHT = 175,
+    TOP = 27,
+    DOWN = 173,
+}
+
+
 Marker = setmetatable({}, Marker)
 
 Marker.__index = Marker
@@ -69,7 +340,7 @@ Marker.__call = function()
 end
 
 --- @param markerType MarkerType
---- @param color table e.g. { 255, 255, 255, 255 } 
+--- @param color table e.g. { 255, 255, 255, 255 }
 --- @param position table
 --- @param direction table
 --- @param rotation table
@@ -77,6 +348,7 @@ end
 --- @param bobble boolean
 --- @param faceCamera boolean
 --- @param param19 boolean
+--- @param rotate boolean
 --- @param textureDict string
 --- @param textureName string
 --- @param drawOnEntity boolean
@@ -90,27 +362,28 @@ function Marker.new(
         bobble,
         faceCamera,
         param19,
+        rotate,
         textureDict,
         textureName,
         drawOnEntity
 )
     _Marker = {
-        _Color = color or { 255.0, 255.0, 255.0, 255.0 },
+        _Color = color or { 255, 255, 255, 255 },
         _MarkerType = markerType or MarkerType.CircleSkinny,
-        _Position = position or {},
-        _Direction = direction or {},
+        _Position = position or {0,0,0},
+        _Direction = direction or {0,0,0},
         _Rotation = rotation or 0,
         _Bobble = bobble or false,
         _FaceCamera = faceCamera or false,
         _Param19 = param19 or 0,
-        _Rotate = rotate or 0,
-        _TextureDict = textureDict or "",
-        _TextureName = textureName or "",
+        _Rotate = rotate or false,
+        _TextureDict = textureDict or 0,
+        _TextureName = textureName or 0,
         _DrawOnEntity = drawOnEntity or false,
         _Scale = scale or { 1.0, 1.0, 1.0 },
         _Drawing = false
     }
-    
+
     return setmetatable(_Marker, Marker)
 end
 
@@ -120,7 +393,7 @@ function table.valsToFloat(input)
             input[i] = input[i] + 0.0
         end
     end
-    
+
     return input
 end
 
@@ -129,16 +402,42 @@ function Marker:Draw()
     if self._Drawing == true then
         return
     end
-    
+
+    print(self._MarkerType,
+            self._Position.X,
+            self._Position.Y,
+            self._Position.Z,
+            self._Direction[1],
+            self._Direction[2],
+            self._Direction[3],
+            self._Rotation[1],
+            self._Rotation[2],
+            self._Rotation[3],
+            self._Scale[1],
+            self._Scale[2],
+            self._Scale[3],
+            self._Color[1],
+            self._Color[2],
+            self._Color[3],
+            self._Color[4],
+            self._Bobble,
+            self._FaceCamera,
+            self._Param19,
+            self._Rotate,
+            self._TextureDict,
+            self._TextureName,
+            self._DrawOnEntity)
+    --                                         (----- dir ---)|(    rotation )|
+-- DrawMarker(2, loc["x"], loc["y"], loc["z"], 0.0, 0.0, 0.0, ( 0.0, 0.0, 0.0, ) (0.25, 0.2, 0.1,) (255, 255, 255, 155), 0, 0, 0, 1, 0, 0, 0)
     self._Drawing = true
     Citizen.CreateThread(function()
         while self._Drawing == true do
-            Citize.Wait(0)
+            Citizen.Wait(0)
             DrawMarker(
                     self._MarkerType,
-                    self._Position[1],
-                    self._Position[2],
-                    self._Position[3],
+                    self._Position.X,
+                    self._Position.Y,
+                    self._Position.Z,
                     self._Direction[1],
                     self._Direction[2],
                     self._Direction[3],
@@ -180,11 +479,11 @@ function Marker:Color(color)
             print("^1Error setting color:^0 Requires 4 fields, but got " .. #color)
             return
         end
-        
+
         color = table.valsToFloat(color)
-        
+
         self._Color = color
-        
+
         return self._Color
     else
         print("^1Error: Invalid type.^0 Expected (table) got (" .. type(color) .. ")")
@@ -253,10 +552,6 @@ function Marker:Scale(scale)
         print("^1Error: Invalid type.^0 Expected (table) got (" .. type(scale) .. ")")
     end
 end
-
-local testMarker = Marker.new(MarkerType.CarSymbol)
-
-testMarker:Draw()
 
 function Marker:Rotation(rotation)
     if rotation == nil then
@@ -336,23 +631,10 @@ function Marker:MarkerType(markerType)
             print("^1Error: Marker type not found")
             return
         end
-        
+
         self._MarkerType = markerType
     end
 end
-
-
-
-local marker = Marker.new(
-        MarkerType.CircleSkinny,
-        { 255, 255, 255, 255 },
-        { 0, 0, 0 },
-        { 0, 0, 0 },
-        { 1.0, 1.0, 1.0 },
-        { 0.0, 0.0, 0.0 },
-        false,
-        false
-)
 
 --- @class MarkerType
 MarkerType = {
@@ -446,13 +728,14 @@ MarkerType = {
     Unknown = 43
 }
 
+
 --- @class Model
 Model = setmetatable({}, Model)
 
 Model.__index = Model
 
 Model.__call = function()
-    return "Vector3"
+    return "Model"
 end
 
 --- @param model number | string the model hash or name
@@ -466,12 +749,12 @@ function Model.new(model)
         Raw = model,
         Hash = model
     }
-    
+
     return setmetatable(_Model, Model)
 end
 
 function Model:Load()
-    if not IsModelInCdImage(self.Hash) then
+    if not IsModelValid(self.Hash) then
         print("^1Error: Invalid model " .. self.Hash)
     end
 
@@ -484,13 +767,71 @@ function Model:Load()
         end
         Wait(100)
     end
-    
+
     return true
 end
 
 function Model:Unload()
     SetModelAsNoLongerNeeded(self.Hash)
 end
+
+
+--- @class NotificationString
+NotificationString = setmetatable({}, NotificationString)
+
+NotificationString.__index = NotificationString
+
+NotificationString.__call = function()
+    return "NotificationString"
+end
+
+
+function NotificationString.new()
+    local _NotificationString = {
+        Text = ""
+    }
+
+    return setmetatable(_NotificationString, NotificationString)
+end
+
+function NotificationString:Format(format, text)
+    self.Text = self.Text .. format .. text
+    return self
+end
+
+function NotificationString:Icon(icon)
+    self.Text = self.Text .. " " .. icon
+    return self
+end
+
+function NotificationString:End()
+    self.Text = self.Text .. NotifyColors.Default
+    return self.Text
+end
+
+NotifyColors = {
+    Blue = "~b~",
+    Green = "~g~",
+    Black = "~l~",
+    Purple = "~p~",
+    Red = "~r~",
+    White = "~w~",
+    Yellow = "~y~",
+    Orange = "~o~",
+    Grey = "~c~",
+    DarkGrey = "~m~",
+    Black = "~u~",
+    Default = "~s~",
+}
+
+NotifyIcons = {
+    WantedStar = "~ws~",
+    Verified = "~|~",
+    RockStar = "~∑~",
+    Lock = "~Ω~",
+    Race = "~BLIP_RACE~"
+}
+
 
 --- @class Ped
 Ped = setmetatable({}, Ped)
@@ -555,7 +896,7 @@ end
 --- @return Vector3
 function Ped:Position(position)
     if type(position) ~= "table" then
-        local rawpos = GetEntityCoords(self._Handle)
+        local rawpos = GetEntityCoords(self.Handle)
         local posVec = Vector3.new(rawpos.x, rawpos.y, rawpos.z)
         return posVec
     end
@@ -588,6 +929,263 @@ PedComponent = {
     Torso2 = 11
 }
 
+Player = Ped.new(PlayerPedId())
+
+
+--- @class HelpPrompt
+HelpPrompt = setmetatable({}, HelpPrompt)
+
+HelpPrompt.__index = HelpPrompt
+
+HelpPrompt.__call = function()
+    return "HelpPrompt"
+end
+
+function HelpPrompt.new(text)
+    local _HelpPrompt = {
+        _Text = text,
+        EachFrame = eachFrame or false,
+        _Drawing = false,
+        _Actions = {},
+        _WaitingForAction = false
+    }
+
+    return setmetatable(_HelpPrompt, HelpPrompt)
+end
+
+function HelpPrompt:Draw(duration)
+    if self._Drawing == true then return end
+    self._Drawing = true
+    if type(duration) == "number" then
+        if duration > 0 then
+            self:WaitForAction()
+            Citizen.CreateThread(function()
+                SetTimeout(duration * 1000, function()
+                    self:Destroy()
+                end)
+                while self._Drawing == true do
+                    Citizen.Wait(0)
+                    SetTextComponentFormat("STRING")
+                    AddTextComponentString(self._Text)
+                    DisplayHelpTextFromStringLabel(0, 0, 1, -1)
+                end
+            end)
+        elseif duration == -1 then
+            self:WaitForAction()
+            Citizen.CreateThread(function()
+                while self._Drawing == true do
+                    Citizen.Wait(0)
+                    SetTextComponentFormat("STRING")
+                    AddTextComponentString(self._Text)
+                    DisplayHelpTextFromStringLabel(0, 0, 1, -1)
+                end
+            end)
+        end
+    elseif duration == nil then
+        SetTextComponentFormat("STRING")
+        AddTextComponentString(self._Text)
+        DisplayHelpTextFromStringLabel(0, 0, 1, -1)
+    end
+end
+
+--- Sets an action for the prompt
+--- @param key number The key to trigger the action
+--- @param handler fun(prompt: HelpPrompt): void The handler function
+function HelpPrompt:Action(key, handler)
+    for k,v in pairs(self._Actions) do
+        if v.key == key then
+            Self._Actions.handler = handler
+            return
+        end
+    end
+
+    table.insert(self._Actions, {
+        key = key,
+        handler = handler
+    })
+end
+
+function HelpPrompt:WaitForAction()
+    if self._WaitingForAction == true then return end
+    self._WaitingForAction = true
+    Citizen.CreateThread(function()
+        while self._WaitingForAction == true do
+            Citizen.Wait(0)
+            for k,v in pairs(self._Actions) do
+                if IsControlJustReleased(0, v.key) then
+                    v.handler(self)
+                end
+            end
+        end
+    end)
+end
+
+function HelpPrompt:Text(text)
+    if type(text) == "string" then
+        self._Text = text
+        return self._Text
+    end
+
+    return self._Text
+end
+
+function HelpPrompt:Destroy()
+    if self._Drawing == true then
+        self._Drawing = false
+    end
+
+    if self._WaitingForAction == true then
+        self._WaitingForAction = false
+    end
+end
+
+
+Tests = {}
+Lester = {}
+
+if not GetGameTimer then
+    GetGameTimer = function()
+        return os.time()
+    end
+end
+
+--- @class Context
+Context = setmetatable({}, Context)
+
+Context.__index = Context
+
+Context.__call = function()
+    return "Context"
+end
+
+function Context.new()
+    local _Context = {
+        Tests ={}
+    }
+    return setmetatable(_Context, Context)
+end
+
+---@param description string
+---@param handler fun(context: Context): void
+---@return Context
+function Context:Should(description, handler)
+    table.insert(self.Tests, {
+        description = description,
+        handler = handler
+    })
+    return self
+end
+
+function Context:Assert(val1, val2)
+    return val1 == val2
+end
+
+---@param description string
+---@param handler fun(context: Context): void
+---@return Context
+function Lester.Describe(description, handler)
+    table.insert(Tests, {
+        description = description,
+        handler = handler
+    })
+end
+
+function Lester.Assert(val, check)
+    return val == check
+end
+
+function Lester.Run()
+
+    for k,v in pairs(Tests) do
+        local context = v.handler(Context.new())
+        print(v.description)
+        if type(context) == nil then
+            print("Context not return. Be sure to return context at the end of Describe")
+            return
+        end
+        local passed = 0
+        local failed = 0
+        for b,z in pairs(context.Tests) do
+            local startTime = GetGameTimer()
+            local res = z.handler()
+            local endTime = GetGameTimer()
+            local diff = endTime - startTime
+            local seconds = math.floor(diff / 1000)
+            local rawRemainder = diff % 1000
+            local remainder
+            if rawRemainder < 10 then
+                remainder = "00" .. rawRemainder
+            elseif rawRemainder < 100 then
+                remainder = "0" .. rawRemainder
+            end
+            if res == true then
+                if not ColorString then
+                    print("    ✅ should " .. z.description .. " ⏱️: " .. diff)
+                else
+                    local output = ColorString.new():LightGreen("✅ " .. z.description):LightBlue(" ⏱️: " .. seconds .. "." .. remainder .. "s"):End()
+                    print(output)
+                end
+                passed = passed + 1
+            else
+                if not ColorString then
+                    print("    ❌ should " .. z.description .. " ⏱️: " .. diff)
+                else
+                    local output = ColorString.new():RedOrange("    ❌" .. z.description):LightBlue(" ⏱️: " .. seconds .. "." .. remainder .. "s"):End()
+                    print(output)
+                end
+                failed = failed + 1
+            end
+        end
+        print("Passed: " .. passed .. " - Failed: " .. failed .. " - " .. (passed / (passed + failed) * 100) .. " % of tests passed")
+    end
+end
+
+if not Vehicle then
+    --- @class Vehicle
+    Vehicle = setmetatable({}, Vehicle)
+
+    Vehicle.__index = Vehicle
+
+    Vehicle.__call = function()
+        return "Vehicle"
+    end
+
+    function Vehicle.new()
+        local _Vehicle = {}
+        return setmetatable(_Vehicle, Vehicle)
+    end
+end
+
+function CreateTruck()
+    local veh = World:CreateVehicle("panto", Player:Position(), 0, true)
+    Citizen.Wait(2000)
+    return veh
+end
+
+Lester.Describe("CreateTruck()", function(context)
+    context:Should("return an instance of the Vehicle class", function()
+        local val = CreateTruck()
+        local response = context:Assert(val.__call(), "Vehicle")
+        val:Delete()
+        return response
+    end)
+
+    context:Should("have a model equal to 'panto'", function()
+        local val = CreateTruck()
+        local response = context:Assert(val:Model(), GetHashKey("panto"))
+        val:Delete()
+        return response
+    end)
+
+    return context
+end)
+
+RegisterCommand("test", function()
+    Lester.Run()
+end)
+
+
+
 --- @class Vector3
 Vector3 = setmetatable({}, Vector3)
 
@@ -604,12 +1202,24 @@ end
 function Vector3.new(x, y, z)
     local _Vector3 = {
         X = x + 0.0,
-        y = y + 0.0,
+        Y = y + 0.0,
         Z = z + 0.0
     }
-    
+
     return setmetatable(_Vector3, Vector3)
 end
+
+--- Gets the distance between two Vector3
+---@param pos Vector3
+---@return number
+function Vector3:DistanceTo(pos)
+    return #(pos:Native() - self:Native())
+end
+
+function Vector3:Native()
+    return vector3(self.X, self.Y, self.Z)
+end
+
 
 --- @class Vehicle
 Vehicle = setmetatable({}, Vehicle)
@@ -623,10 +1233,64 @@ end
 function Vehicle.new(handle)
     local _Vehicle = {
         Handle = handle,
-        PassengerCapacity = GetVehicleMaxNumberOfPassengers(handle)
+        PassengerCapacity = GetVehicleMaxNumberOfPassengers(handle),
     }
-    
+
     return setmetatable(_Vehicle, Vehicle)
+end
+
+function Vehicle:Model(model)
+    if model == nil then
+        return GetEntityModel(self.Handle)
+    end
+    local pos = self:Position()
+    local heading = self:Heading()
+    self:Delete(true)
+    local newveh = World:CreateVehicle(model,pos, heading,true)
+
+    self.Handle = newveh.Handle
+end
+
+---@param wait boolean Whether to actually wait for the vehicle to delete
+function Vehicle:Delete(wait)
+    if wait == true then
+        DeleteVehicle(self.Handle)
+        while DoesEntityExist(self.Handle) do
+            Citizen.Wait(5)
+        end
+        return
+    end
+
+    DeleteVehicle(self.Handle)
+end
+
+
+--- @return Vector3
+function Vehicle:Position(pos)
+    if type(pos) == "table" then
+        if pos.X and pos.Y and pos.Z then
+            SetEntityCoords(self.Handle, pos.X, pos.Y, pos.Z)
+            return
+        end
+        Error.new("Invalid position"):Print()
+    end
+
+    local _pos = GetEntityCoords(self.Handle)
+    return Vector3.new(_pos.x, _pos.y, _pos.z)
+end
+
+function Vehicle:Heading(heading)
+    if type(heading) == "number" then
+        SetEntityHeading(self.Handle, heading + 0.0)
+        return self:Heading()
+    end
+
+    return GetEntityHeading(self.Handle)
+end
+
+function Vehicle:GetNetworkOwner()
+    local owner = NetworkGetEntityOwner(self.Handle)
+    return NetworkGetEntityOwner(owner), GetPlayerServerId(owner)
 end
 
 --- opens a vehicle door
@@ -828,7 +1492,21 @@ ToggleMods = {
     "Xenon"
 }
 
+
 World = {}
+
+function dump(o)
+    if type(o) == 'table' then
+        local s = '{ '
+        for k,v in pairs(o) do
+            if type(k) ~= 'number' then k = '"'..k..'"' end
+            s = s .. '['..k..'] = ' .. dump(v) .. ','
+        end
+        return s .. '} '
+    else
+        return tostring(o)
+    end
+end
 
 --- creates a vehicle in the world at a given position
 --- @param model number | string the model of the vehicle to spawn
@@ -838,13 +1516,16 @@ World = {}
 --- @return Vehicle
 function World:CreateVehicle(model, position, heading, networked)
     local vehModel = Model.new(model)
+    print("position", dump(position))
     if not vehModel:Load() then return end
     local veh = CreateVehicle(vehModel.Hash, position.X, position.Y, position.Z, heading or 0, networked or true, true)
     vehModel:Unload()
     if veh == 0 then
         print("^1Error: An Unknown error happened while creating the vehicle")
+        return
     end
-    
+    print("^2Created Vehicle: ^3" .. veh .. "^0" .. " at ^4" .. position.X .. ", " .. position.Y .. ", " .. position.Z)
+
     return Vehicle.new(veh)
 end
 
@@ -927,4 +1608,5 @@ WeatherType = {
     LightSnow = "SNOWLIGHT",
     Blizzard = "BLIZZARD"
 }
+
 
