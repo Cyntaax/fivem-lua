@@ -22,7 +22,6 @@ class LuaBuilder {
         return new Promise(async (resolve, reject) => {
             for(const context of this.contexts) {
                 const contextBuff = await this.getContextBuffer(context)
-                console.log(`writing`, contextBuff)
                 await this.writeContext(context, contextBuff)
             }
             fs.readFile(`./src/fxmanifest.lua`, 'utf8', (err, manifest) => {
@@ -55,7 +54,6 @@ class LuaBuilder {
             fs.mkdir("./dist", () => {
                 fs.mkdir(`./dist/${context}`, () => {
                     fs.writeFile(`./dist/${context}/${context}.lua`, buff, (err) => {
-                        console.log(err)
                         resolve()
                     })
                 })
