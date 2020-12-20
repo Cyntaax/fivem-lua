@@ -66,8 +66,7 @@ function Vehicle:Heading(heading)
 end
 
 function Vehicle:GetNetworkOwner()
-    local owner = NetworkGetEntityOwner(self.Handle)
-    return NetworkGetEntityOwner(owner), GetPlayerServerId(owner)
+    return NetPlayer.new(GetPlayerServerId(NetworkGetEntityOwner(self.Handle)))
 end
 
 --- opens a vehicle door

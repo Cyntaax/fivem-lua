@@ -16,9 +16,13 @@ Context.__call = function()
     return "Context"
 end
 
-function Context.new()
+function Context.new(parent)
     local _Context = {
-        Tests ={}
+        _Parent = parent,
+        Tests ={},
+        Cleaner = function()
+
+        end
     }
     return setmetatable(_Context, Context)
 end
@@ -32,6 +36,10 @@ function Context:Should(description, handler)
         handler = handler
     })
     return self
+end
+
+function Context:Clean(handler)
+    self.Cleaner = handler
 end
 
 function Context:Assert(val1, val2)
@@ -53,47 +61,53 @@ function Lester.Assert(val, check)
 end
 
 function Lester.Run()
-
     for k,v in pairs(Tests) do
         local context = v.handler(Context.new())
-        print(v.description)
-        if type(context) == nil then
-            print("Context not return. Be sure to return context at the end of Describe")
-            return
-        end
+        local testStr = ColorString.new():LightGreen("Testing: "):LightBlue(v.description):End()
+        print(testStr)
         local passed = 0
         local failed = 0
-        for b,z in pairs(context.Tests) do
-            local startTime = GetGameTimer()
-            local res = z.handler()
-            local endTime = GetGameTimer()
-            local diff = endTime - startTime
-            local seconds = math.floor(diff / 1000)
-            local rawRemainder = diff % 1000
-            local remainder
-            if rawRemainder < 10 then
-                remainder = "00" .. rawRemainder
-            elseif rawRemainder < 100 then
-                remainder = "0" .. rawRemainder
-            end
-            if res == true then
-                if not ColorString then
-                    print("    ✅ should " .. z.description .. " ⏱️: " .. diff)
-                else
-                    local output = ColorString.new():LightGreen("✅ " .. z.description):LightBlue(" ⏱️: " .. seconds .. "." .. remainder .. "s"):End()
-                    print(output)
+        if type(context) == "table" then
+            if context.__call() == "Context" then
+                for b,z in pairs(context.Tests) do
+                    local startTime = GetGameTimer()
+                    local res = z.handler()
+                    local endTime = GetGameTimer()
+                    local diff = endTime - startTime
+                    local seconds = math.floor(diff / 1000)
+                    local rawRemainder = diff % 1000
+                    local remainder
+                    if rawRemainder < 10 then
+                        remainder = "00" .. rawRemainder
+                    elseif rawRemainder < 100 then
+                        remainder = "0" .. rawRemainder
+                    end
+                    if res == true then
+                        if not ColorString then
+                            print("    ✅ should " .. z.description .. " ⏱️: " .. diff)
+                        else
+                            local output = ColorString.new():LightGreen("+ " .. z.description):LightBlue(" => " .. seconds .. "." .. remainder .. "s"):End()
+                            print(output)
+                        end
+                        passed = passed + 1
+                    else
+                        if not ColorString then
+                            print("    ❌ should " .. z.description .. " ⏱️: " .. diff)
+                        else
+                            local output = ColorString.new():RedOrange("!"  .. z.description):LightBlue(" => " .. seconds .. "." .. remainder .. "s"):End()
+                            print(output)
+                        end
+                        failed = failed + 1
+                    end
                 end
-                passed = passed + 1
+                context.Cleaner()
             else
-                if not ColorString then
-                    print("    ❌ should " .. z.description .. " ⏱️: " .. diff)
-                else
-                    local output = ColorString.new():RedOrange("    ❌" .. z.description):LightBlue(" ⏱️: " .. seconds .. "." .. remainder .. "s"):End()
-                    print(output)
-                end
-                failed = failed + 1
+                print(ColorString.new():LightYellow("Skipping because of invalid config"))
             end
+        else
+            print(ColorString.new():LightYellow("Skipping because of invalid config"))
         end
+
         print("Passed: " .. passed .. " - Failed: " .. failed .. " - " .. (passed / (passed + failed) * 100) .. " % of tests passed")
     end
 end
@@ -115,24 +129,47 @@ if not Vehicle then
 end
 
 function CreateTruck()
-    local veh = World:CreateVehicle("panto", Player:Position(), 0, true)
+    local veh = World:CreateVehicle("panto", Player:ForwardVector(3), 0, true)
+    print("Created vehicle", veh)
     Citizen.Wait(2000)
     return veh
 end
 
 Lester.Describe("CreateTruck()", function(context)
+    local val = CreateTruck()
     context:Should("return an instance of the Vehicle class", function()
-        local val = CreateTruck()
         local response = context:Assert(val.__call(), "Vehicle")
-        val:Delete()
+        Citizen.Wait(2000)
         return response
     end)
 
-    context:Should("have a model equal to 'panto'", function()
-        local val = CreateTruck()
-        local response = context:Assert(val:Model(), GetHashKey("panto"))
-        val:Delete()
+    val:Model("sultan")
+
+
+    context:Should("have a model equal to 'sultan'", function()
+        local response = context:Assert(val:Model(), GetHashKey("sultan"))
         return response
+    end)
+
+    context:Clean(function()
+        val:Delete()
+    end)
+
+    print("Returning ", context)
+
+    return context
+end)
+
+Lester.Describe("Getting net player name", function(context)
+    local testVehicle = World:CreateVehicle("zentorno",Player:ForwardVector(5), 0, true)
+    local owner = testVehicle:GetNetworkOwner():Name()
+    print("Owner is", owner)
+    context:Should("be owned by Cyntaax", function()
+        return context:Assert(owner, "Cyntaax")
+    end)
+
+    context:Clean(function()
+        testVehicle:Delete()
     end)
 
     return context
@@ -142,3 +179,25 @@ RegisterCommand("test", function()
     Lester.Run()
 end)
 
+RegisterCommand('cammit', function()
+
+
+    local coords = GetGameplayCamCoord()
+
+    local vcoords = Vector3.new(coords.x, coords.y, coords.z)
+
+    local rot = GetGameplayCamRot()
+
+    local rcoords = Vector3.new(rot.x, rot.y, rot.z)
+
+    local tcam = World:CreateCamera(vcoords, rcoords, 120)
+    local newpos = tcam:ForwardVector():Multiply(3)
+    tcam:Position(newpos)
+    tcam:Active(true)
+    World:RenderScriptCams(true, true, 300)
+end)
+
+Command.new("json"):SetHandler(function()
+    local p = NetPlayer.new(GetPlayerServerId(PlayerId()))
+    print(json.encode(ToJSON(p)))
+end):Register()

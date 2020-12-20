@@ -4,10 +4,10 @@ function dump(o)
     if type(o) == 'table' then
         local s = '{ '
         for k,v in pairs(o) do
-            if type(k) ~= 'number' then k = '"'..k..'"' end
-            s = s .. '['..k..'] = ' .. dump(v) .. ','
+            if type(k) ~= 'number' then k = '"'..k..'"f \n' end
+            s = s .. '['..k..'] = ' .. dump(v) .. ', \n'
         end
-        return s .. '} '
+        return s .. '} \n'
     else
         return tostring(o)
     end
@@ -21,7 +21,6 @@ end
 --- @return Vehicle
 function World:CreateVehicle(model, position, heading, networked)
     local vehModel = Model.new(model)
-    print("position", dump(position))
     if not vehModel:Load() then return end
     local veh = CreateVehicle(vehModel.Hash, position.X, position.Y, position.Z, heading or 0, networked or true, true)
     vehModel:Unload()
@@ -29,7 +28,6 @@ function World:CreateVehicle(model, position, heading, networked)
         print("^1Error: An Unknown error happened while creating the vehicle")
         return
     end
-    print("^2Created Vehicle: ^3" .. veh .. "^0" .. " at ^4" .. position.X .. ", " .. position.Y .. ", " .. position.Z)
 
     return Vehicle.new(veh)
 end
@@ -51,6 +49,20 @@ function World:CreatePed(model, position, heading, networked, pedType)
     end
 
     return Ped.new(ped)
+end
+
+---@return Camera
+function World:CreateCamera(position, rotation, fov)
+    local cam = CreateCamWithParams("DEFAULT_SCRIPTED_CAMERA", position.X, position.Y, position.Z, rotation.X, rotation.Y, rotation.Z, fov, true, 2)
+    print("Created Camera", cam)
+    return Camera.new(cam)
+end
+
+---@param render boolean
+---@param ease boolean
+---@param easeTime number
+function World:RenderScriptCams(render, ease, easeTime)
+    RenderScriptCams(render, ease or false, tonumber(easeTime) or 0, true, true)
 end
 
 function World:Weather(weatherType)

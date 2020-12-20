@@ -14,34 +14,7 @@ function Ped.new(handle)
         Appearance = {
         }
     }
-
-    for k,v in pairs(PedComponent) do
-        _Ped.Appearance[k] = function()
-            local texture = GetPedTextureVariation(_Ped.Handle, v)
-            local drawable = GetPedDrawableVariation(_Ped.Handle, v)
-            return drawable, texture
-        end
-
-        _Ped.Appearance["Set" .. k] = function(drawable, texture)
-            SetPedComponentVariation(_Ped.Handle, v, drawable, texture, 0)
-        end
-    end
-
     return setmetatable(_Ped, Ped)
-end
-
---- gets the ped's current appearance data and forms a json object
---- @return string a stringified json object of the ped appearance data
-function Ped:AppearanceJSON()
-    local tmpTable = {}
-    for k,v in pairs(PedComponent) do
-        local drawable, texture = self.Appearance[k]()
-        tmpTable[k] = {
-            drawables = drawable,
-            textures = texture
-        }
-    end
-    return json.encode(tmpTable)
 end
 
 --- Gets or sets the ped's current health
@@ -50,10 +23,21 @@ end
 --- @return number the ped's current health
 function Ped:Health(health)
     if type(health) ~= "number" then
+        print("self is", self)
         return GetEntityHealth(self.Handle)
     end
-    SetEntityHealth(self._Handle, health + 0.0)
+    print(self)
+    SetEntityHealth(self.Handle, health + 0.0)
     return self:Health()
+end
+
+---@param distance number
+---@return Vector3
+function Ped:ForwardVector(distance)
+    distance = tonumber(distance) or 1
+    local forward = GetEntityForwardVector(self.Handle)
+    local x, y, z = table.unpack(self:Position():Native() + forward * distance)
+    return Vector3.new(x,y,z)
 end
 
 --- Gets or sets the ped's current position
@@ -93,5 +77,3 @@ PedComponent = {
     Badge = 10,
     Torso2 = 11
 }
-
-Player = Ped.new(PlayerPedId())
