@@ -63,5 +63,5 @@ class LuaBuilder {
 
 const builder = new LuaBuilder(["client", "server", "shared"])
 builder.compile().then(() => {
-    console.log(`Compilation complete`)
+
 })
