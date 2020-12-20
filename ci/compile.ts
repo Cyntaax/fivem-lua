@@ -36,7 +36,7 @@ class LuaBuilder {
 
     private getContextBuffer(context: Context): Promise<Buffer> {
         return new Promise((resolve, reject) => {
-            const glob = new Glob(`./src/${context}/*.lua`, {absolute: true}, async (err, matches) => {
+            const glob = new Glob(`./src/${context}/**/*.lua`, {absolute: true}, async (err, matches) => {
                 let output: Buffer[] = []
                 for (const file of matches) {
                     if(file.indexOf("fxmanifest.lua") > -1) continue;
