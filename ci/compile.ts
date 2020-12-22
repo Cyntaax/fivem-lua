@@ -11,6 +11,8 @@ const getFileContents = (filePath: string): Promise<Buffer> => {
     })
 }
 
+const outDir = process.argv[3] || './dist'
+
 type Context = "client" | "server" | "shared"
 
 class LuaBuilder {
@@ -25,7 +27,7 @@ class LuaBuilder {
             }
             fs.readFile(`./src/fxmanifest.lua`, 'utf8', (err, manifest) => {
                 const newManifest = manifest.replace(/^(version )'(.*)'$/gm, `$1 '${process.env.NEXT_VERSION || '0.0.0'}'`)
-                fs.writeFile(`./dist/fxmanifest.lua`, newManifest, () => {
+                fs.writeFile(`${outDir}/fxmanifest.lua`, newManifest, () => {
                     fs.writeFile(`./src/fxmanifest.lua`, newManifest, () => {
                         resolve()
                     })
@@ -50,9 +52,9 @@ class LuaBuilder {
 
     private writeContext(context: string, buff: Buffer): Promise<void> {
         return new Promise((resolve, reject) => {
-            fs.mkdir("./dist", () => {
-                fs.mkdir(`./dist/${context}`, () => {
-                    fs.writeFile(`./dist/${context}/${context}.lua`, buff, (err) => {
+            fs.mkdir(outDir, () => {
+                fs.mkdir(`${outDir}/${context}`, () => {
+                    fs.writeFile(`${outDir}/${context}/${context}.lua`, buff, (err) => {
                         resolve()
                     })
                 })

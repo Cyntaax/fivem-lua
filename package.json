@@ -3,7 +3,8 @@
     "release": "semantic-release --debug true",
     "release-ci": "semantic-release",
     "release-pre": "semantic-release -d",
-    "build": "ts-node ci/compile.ts"
+    "build": "ts-node ci/compile.ts",
+    "build-fivem": "ts-node ci/compile.ts 0 ../fxl"
   },
   "devDependencies": {
     "semantic-release": "17.0.8",
