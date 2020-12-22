@@ -30,6 +30,7 @@ end
 
 ---@param wait boolean Whether to actually wait for the vehicle to delete
 function Vehicle:Delete(wait)
+    SetEntityAsMissionEntity(self.Handle)
     if wait == true then
         DeleteVehicle(self.Handle)
         while DoesEntityExist(self.Handle) do
