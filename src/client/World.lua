@@ -1,18 +1,5 @@
 World = {}
 
-function dump(o)
-    if type(o) == 'table' then
-        local s = '{ '
-        for k,v in pairs(o) do
-            if type(k) ~= 'number' then k = '"'..k..'"f \n' end
-            s = s .. '['..k..'] = ' .. dump(v) .. ', \n'
-        end
-        return s .. '} \n'
-    else
-        return tostring(o)
-    end
-end
-
 --- creates a vehicle in the world at a given position
 --- @param model number | string the model of the vehicle to spawn
 --- @param position Vector3 the position to spawn the vehicle at

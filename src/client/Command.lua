@@ -94,7 +94,6 @@ function Command:Register()
                 args[k] = out
             end
         end
-        print(json.encode(args))
         self.Handler(source, table.unpack(args))
     end)
 end
