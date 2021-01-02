@@ -236,9 +236,15 @@ function ORM.GenerateQuery(tb, kind, queryInfo, data)
         local tmpStr = "INSERT INTO " .. tb .. "(" .. fields .. ") VALUES(" .. valfields .. ")"
         log(tmpStr, "Green")
         return function(cb)
-            MySQL.Async.execute(tmpStr, tmp, function(rowsAffected)
-                cb()
-            end)
+            if MySQL ~= nil then
+                MySQL.Async.execute(tmpStr, tmp, function(rowsAffected)
+                    cb()
+                end)
+            else
+                exports.ghmattimysql:execute(tmpStr, tmp, function()
+                    cb()
+                end)
+            end
         end
     elseif kind == "update" then
         local tmpVals = {}
@@ -275,9 +281,15 @@ function ORM.GenerateQuery(tb, kind, queryInfo, data)
         log(tmpstr, "Green")
         log(tmpVals)
         return function(cb)
-            MySQL.Async.execute(tmpstr, tmpVals, function(affected)
-                cb(affected)
-            end)
+            if MySQL ~= nil then
+                MySQL.Async.execute(tmpstr, tmpVals, function(affected)
+                    cb(affected)
+                end)
+            else
+                exports.ghmattimysql:execute(tmpstr, tmpVals, function(affected)
+                    cb(affected)
+                end)
+            end
         end
     elseif kind == "select" then
         local tmpValMap = {}
@@ -318,14 +330,20 @@ function ORM.GenerateQuery(tb, kind, queryInfo, data)
         end
         log(getStr, "Green")
         return function(cb)
-            MySQL.Async.fetchAll(getStr, tmpValMap, function(vals)
-                if type(vals) ~= "table" then cb({}) return end
-                if vals then
+            if MySQL ~= nil then
+                MySQL.Async.fetchAll(getStr, tmpValMap, function(vals)
+                    if type(vals) ~= "table" then cb({}) return end
+                    if vals then
+                        cb(vals)
+                    else
+                        cb({})
+                    end
+                end)
+            else
+                exports.ghmattimysql:execute(getStr, tmpValMap, function(vals)
                     cb(vals)
-                else
-                    cb({})
-                end
-            end)
+                end)
+            end
         end
     elseif kind == "create" then
         local columns = data.__schema
@@ -365,18 +383,29 @@ function ORM.GenerateQuery(tb, kind, queryInfo, data)
         query = query .. ")"
 
         return function(cb)
-            print("executing", query)
-            MySQL.Async.execute(query, {}, function(affected)
-                cb(affected)
-            end)
+            if MySQL ~= nil then
+                MySQL.Async.execute(query, {}, function(affected)
+                    cb(affected)
+                end)
+            else
+                exports.ghmattimysql:execute(query, {}, function(affected)
+                    cb(affected)
+                end)
+            end
         end
     elseif kind == "drop" then
         local table = tb
         local query = "DROP TABLE " .. table
         return function(cb)
-            MySQL.Async.execute(query, {}, function(affected)
-                cb(affected)
-            end)
+            if MySQL ~= nil then
+                MySQL.Async.execute(query, {}, function(affected)
+                    cb(affected)
+                end)
+            else
+                exports.ghmattimysql:execute(query, {}, function(affected)
+                    cb(affected)
+                end)
+            end
         end
     end
 
