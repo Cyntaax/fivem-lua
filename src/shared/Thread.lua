@@ -70,6 +70,9 @@ function Thread:Start()
     Citizen.CreateThread(function()
         while self:Running() == true do
             Citizen.Wait(self:Wait())
+            if self:Running() == false then
+                break
+            end
             local start = GetGameTimer()
             local res = self:Handler()(self)
             local duration = GetGameTimer() - start
