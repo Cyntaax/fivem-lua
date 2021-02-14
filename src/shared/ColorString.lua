@@ -61,7 +61,7 @@ function ColorString:Fuchsia(text)
 end
 
 function ColorString:End()
-    self.Text = self.Text .. "^0"
+    self.Text = self.Text .. "^7"
     return self.Text
 end
 

@@ -21,5 +21,5 @@ end
 
 --- Prints the error message
 function Error:Print()
-    print("^1" .. self.Message)
+    print("^1" .. self.Message .. "^7")
 end
