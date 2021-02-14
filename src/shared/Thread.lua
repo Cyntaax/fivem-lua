@@ -11,12 +11,17 @@ Thread.__index = Thread
 
 ---@param name string
 ---@param handler fun(thread: Thread): any
-function Thread.new(name, handler)
+function Thread.new(name, wait, handler)
+    if type(tonumber(wait)) ~= "number" then wait = 0 end
+    if wait < 0 then wait = 0 end
+    local tmpFun = function()
+
+    end
     local _Thread = {
         _Name = name,
-        _Handler = handler,
+        _Handler = handler or tmpFun,
         _Running = false,
-        _Wait = 0,
+        _Wait = wait or 0,
         _Deferral = function()
         end,
         _Stats = {
@@ -60,6 +65,7 @@ end
 function Thread:Start()
     if self:Running() == true then print(ColorString.new():RedOrange("thread [" .. self:Name() .. "] already running"):End()) end
     self._Stats.TimesRun = self._Stats.TimesRun + 1
+    self:Running(true)
     TriggerEvent('fxl:threadCreated', self:Name())
     Citizen.CreateThread(function()
         while self:Running() == true do
