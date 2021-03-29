@@ -175,29 +175,3 @@ Lester.Describe("Getting net player name", function(context)
     return context
 end)
 
-RegisterCommand("test", function()
-    Lester.Run()
-end)
-
-RegisterCommand('cammit', function()
-
-
-    local coords = GetGameplayCamCoord()
-
-    local vcoords = Vector3.new(coords.x, coords.y, coords.z)
-
-    local rot = GetGameplayCamRot()
-
-    local rcoords = Vector3.new(rot.x, rot.y, rot.z)
-
-    local tcam = World:CreateCamera(vcoords, rcoords, 120)
-    local newpos = tcam:ForwardVector():Multiply(3)
-    tcam:Position(newpos)
-    tcam:Active(true)
-    World:RenderScriptCams(true, true, 300)
-end)
-
-Command.new("json"):SetHandler(function()
-    local p = NetPlayer.new(GetPlayerServerId(PlayerId()))
-    print(json.encode(ToJSON(p)))
-end):Register()

@@ -558,48 +558,6 @@ function TPlayer.new()
 end
 
 
-local testPlayer = TPlayer.new()
-
-
-if RegisterCommand then
-    RegisterCommand("testq", function()
-        ORM.GenerateQuery(testPlayer.__tablename, "create", {}, testPlayer)(function(cb)
-            print("DONE!", cb)
-        end)
-    end)
-    RegisterCommand("testd", function()
-        ORM.GenerateQuery(testPlayer.__tablename, "drop", {}, testPlayer)(function()
-            print("Dropped the table")
-        end)
-    end)
-
-    RegisterCommand("droptable", function(source, args)
-        local table = args[1]
-        ORM.GenerateQuery(table, "drop", {}, Ver.new())(function()
-            print("Dropped table " .. table)
-        end)
-    end)
-
-    RegisterCommand("addu", function()
-        testPlayer.Name = "Bob Jenkins"
-        testPlayer.save(function()
-            print("Created")
-        end)
-    end)
-
-    RegisterCommand("listu", function()
-        testPlayer.findAll(function(pls)
-            print(DumpTable(pls))
-        end)
-    end)
-
-    RegisterCommand("migrate", function()
-        ORM.AutoMigrate({testPlayer, Ver.new(), Acc.new()}, function()
-            print("Migrations complete!")
-        end)
-    end)
-end
-
 local Colors = {
     Red = "^1",
     Green = "^2",
