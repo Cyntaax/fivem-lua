@@ -36,13 +36,11 @@ function Server.listen()
                         if z.pathData then
                             local start = 1
                             for i,j in path:gmatch(z.path) do
-                                print("checking path", i, start)
                                 if z.pathData.params[start] == nil then print("breaking") break end
                                 z.pathData.params[start].value = i
                                 start = start + 1
                             end
                             for i,j in pairs(z.pathData.params) do
-                                print("setting param", j.name, j.value)
                                 request:SetParam(j.name, j.value)
                             end
                         end
