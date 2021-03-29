@@ -65,3 +65,14 @@ end
 function Request:Method()
     return self._Raw.method
 end
+
+--- Gets the value for the specified header
+---@param name string
+---@return string
+function Request:Header(name)
+    for k,v in pairs(self._Raw.headers) do
+        if k == name then
+            return v
+        end
+    end
+end
