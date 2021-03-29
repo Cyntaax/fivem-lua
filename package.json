@@ -28,7 +28,7 @@
         {
           "assets": [
             {
-              "path": "./dist/release.zip",
+              "path": "./release.zip",
               "label": "Resource"
             }
           ]
